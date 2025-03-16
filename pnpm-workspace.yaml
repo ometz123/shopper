@@ -1,2 +1,12 @@
-packages: 
-  - "packages/*"
+packages:
+  - packages/*
+ignoredBuiltDependencies:
+  - '@nestjs/core'
+  - '@parcel/watcher'
+  - '@swc/core'
+  - cypress
+  - esbuild
+  - nx
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - nx
