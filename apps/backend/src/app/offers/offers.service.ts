@@ -1,15 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class OffersService {
+  constructor( @Inject(PrismaService)private readonly prismaService: PrismaService) {
+  }
   create(createOfferDto: CreateOfferDto) {
     return 'This action adds a new offer';
   }
 
-  findAll() {
-    return `This action returns all offers`;
+  async findAll() {
+    const allOffers=await this.prismaService.offer.findMany();
+    return allOffers;
   }
 
   findOne(id: number) {

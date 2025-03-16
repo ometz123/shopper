@@ -1,1 +1,6 @@
-export class CreatePurchaseDto {}
+export class CreatePurchaseDto {
+  userId: string;
+  offerId: string;
+  quantity: number;
+
+}
