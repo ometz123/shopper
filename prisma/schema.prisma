@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // binaryTargets = ["native", "darwin", "debian-openssl-3.0.x"]
+  // previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  password  String
+  name      String
+  Purchases Purchase[]
+}
+
+model Offer {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  imageURL     String
+  price        Float
+  limitPerUser Int
+  Purchases    Purchase[]
+}
+
+model Purchase {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  updatedAt DateTime @default(now())
+  userId    String   @db.ObjectId
+  offerId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  date      DateTime
+  quantity  Int
+
+  @@unique([userId, offerId])
+}
