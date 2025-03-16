@@ -1,9 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PurchaseDto } from './dto/purchase.dto';
-import { Purchase } from './entities/purchase.entity';
 
 @Injectable()
 export class PurchasesService {
@@ -12,18 +16,53 @@ export class PurchasesService {
   ) {}
 
   async create(createPurchaseDto: CreatePurchaseDto): Promise<PurchaseDto> {
-    const newPurchase = await this.prismaService.purchase.create({
-      data: createPurchaseDto,
+    const newPurchase = await this.prismaService.$transaction(async (tx) => {
+      const offer = await tx.offer.findUnique({
+        where: { id: createPurchaseDto.offerId },
+      });
+      if (!offer) {
+        throw new NotFoundException('Offer not found');
+      }
+
+      const userOfferPurchase = await tx.purchase.findFirst({
+        where: {
+          offerId: createPurchaseDto.offerId,
+          userId: createPurchaseDto.userId,
+        },
+      });
+
+      if (
+        createPurchaseDto.quantity + (userOfferPurchase?.quantity || 0) <=
+        offer.limitPerUser
+      ) {
+        return tx.purchase.upsert({
+          where: {
+            userId_offerId: {
+              userId: createPurchaseDto.userId,
+              offerId: createPurchaseDto.offerId,
+            },
+          },
+          update: {
+            quantity:
+              (userOfferPurchase?.quantity || 0) + createPurchaseDto.quantity,
+          },
+          create: {
+            userId: createPurchaseDto.userId,
+            offerId: createPurchaseDto.offerId,
+            quantity: createPurchaseDto.quantity,
+          },
+        });
+      }
+
+      throw new BadRequestException('Purchase quantity exceeds limit');
     });
 
-    const purchaseDto: PurchaseDto = {
+    return {
       id: newPurchase.id,
       userId: newPurchase.userId,
       offerId: newPurchase.offerId,
       quantity: newPurchase.quantity,
     };
-
-    return purchaseDto;
   }
 
   findAll() {
