@@ -3,6 +3,7 @@ export class Offer {
   title: string;
   price: number;
   limitPerUser:number;
+  imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;

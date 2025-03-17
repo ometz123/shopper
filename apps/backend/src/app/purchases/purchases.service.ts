@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
@@ -53,8 +55,7 @@ export class PurchasesService {
           },
         });
       }
-
-      throw new BadRequestException('Purchase quantity exceeds limit');
+      throw new NotAcceptableException('Purchase quantity exceeds limit');
     });
 
     return {
@@ -69,8 +70,45 @@ export class PurchasesService {
     return `This action returns all purchases`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} purchase`;
+  async findByUserId(id: string): Promise<PurchaseDto[]> {
+    const purchases = await this.prismaService.purchase.findMany({
+      where: { userId: id },
+    });
+
+    if (!purchases) {
+      throw new NotFoundException('Purchases not found');
+    }
+
+    const purchaseDtos: PurchaseDto[] = purchases.map((purchase) => ({
+      id: purchase.id,
+      userId: purchase.userId,
+      offerId: purchase.offerId,
+      quantity: purchase.quantity,
+    }));
+
+    return purchaseDtos;
+  }
+
+  async findByUserOfferId(
+    userId: string,
+    offerId: string
+  ): Promise<PurchaseDto> {
+    const purchase = await this.prismaService.purchase.findUnique({
+      where: { userId_offerId:{userId: userId, offerId: offerId }},
+    });
+
+    if (!purchase) {
+      throw new NotFoundException('Purchase not found');
+    }
+
+    const purchaseDto: PurchaseDto = {
+      id: purchase.id,
+      userId: purchase.userId,
+      offerId: purchase.offerId,
+      quantity: purchase.quantity,
+    };
+
+    return purchaseDto;
   }
 
   update(id: number, updatePurchaseDto: UpdatePurchaseDto) {

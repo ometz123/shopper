@@ -32,6 +32,10 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
+  async findByName(name: string) {
+    return this.prismaService.user.findFirst({ where: { name } });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }

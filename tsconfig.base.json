@@ -15,7 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@shopper/shared": ["libs/shared/src/index.ts"]
+      "@shopper/shared": ["libs/shared/src/index.ts"],
+      "@shopper/shared/types": ["libs/shared/src/types/types.ts"],
+
     }
   },
   "exclude": ["node_modules", "tmp"]
