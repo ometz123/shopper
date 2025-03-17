@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios, { AxiosError } from 'axios';
+import { IPurchase } from '@shopper/shared/types';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -13,14 +14,14 @@ export const usePurchaseOffer = () => {
     userId: string,
     offerId: string,
     quantity: number
-  ) => {
+  ):Promise<IPurchase|null> => {
     setIsPurchasing(true);
     setPurchaseError(null);
     setPurchaseSuccess(false);
     setExceededLimit(false);
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/purchases`, {
+      const response = await axios.post<IPurchase>(`${BACKEND_URL}/purchases`, {
         userId,
         offerId,
         quantity,
@@ -38,7 +39,7 @@ export const usePurchaseOffer = () => {
           console.log(err);
           setExceededLimit(true);
           setPurchaseError('Purchase not allowed. Please check offer limits.');
-          return err.response.data ;
+          return err.response.data;
         } else {
           setPurchaseError(err.message || 'Error while purchasing the offer');
         }
@@ -48,17 +49,16 @@ export const usePurchaseOffer = () => {
     } finally {
       setIsPurchasing(false);
     }
+    return null
   };
-  const validateStatus = (status: number) => {
-    return status === 404 || status === 200;
-  };
-  const userOfferPurchase = async (userId: string, offerId: string) => {
+
+  const userOfferPurchase = async (
+    userId: string,
+    offerId: string
+  ): Promise<IPurchase | null> => {
     try {
-      const response = await axios.get(
-        `${BACKEND_URL}/purchases/user/${userId}/offer/${offerId}`,
-        {
-          validateStatus,
-        }
+      const response = await axios.get<IPurchase>(
+        `${BACKEND_URL}/purchases/user/${userId}/offer/${offerId}`
       );
       return response.data;
     } catch (err) {
@@ -68,12 +68,36 @@ export const usePurchaseOffer = () => {
       } else {
         setPurchaseError('Error while fetching the offer');
       }
+      return null;
+    }
+  };
+
+  const userOffersPurchases = async (
+    userId: string,
+    offerIds: string[]
+  ): Promise<IPurchase[] | null> => {
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/purchases/user/${userId}`,
+        offerIds
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (err) {
+      console.log({ err });
+      if (err instanceof AxiosError) {
+        setPurchaseError(err.message || 'Error while fetching the offer');
+      } else {
+        setPurchaseError('Error while fetching the offer');
+      }
+      return null
     }
   };
 
   return {
     purchaseOffer,
     userOfferPurchase,
+    userOffersPurchases,
     isPurchasing,
     purchaseError,
     purchaseSuccess,

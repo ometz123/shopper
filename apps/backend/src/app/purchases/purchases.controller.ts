@@ -38,6 +38,14 @@ export class PurchasesController {
     return this.purchasesService.findByUserOfferId(userId, offerId);
   }
 
+  @Post('user/:userId')
+  multiFindByUserOfferId(
+    @Param('userId') userId: string,
+    @Body('offerId') offerIds: string[]
+  ) {
+    return this.purchasesService.multiFindByUserOfferId(userId, offerIds);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

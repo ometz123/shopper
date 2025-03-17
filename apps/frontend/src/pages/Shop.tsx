@@ -25,7 +25,7 @@ const Shop: React.FC = () => {
           Failed to load offers. Please try again later.
         </p>
       )}
-      <OfferList offers={offers} user={user} />
+      {user && offers && <OfferList offers={offers} user={user} />}
     </div>
   );
 };

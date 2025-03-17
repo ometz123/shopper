@@ -103,6 +103,23 @@ export class PurchasesService {
     return purchaseDtos;
   }
 
+  async multiFindByUserOfferId(
+    userId: string,
+    offerIds: string[]
+  ): Promise<PurchaseDto[] | null> {
+    const purchases = await this.prismaService.purchase.findMany({
+      where: { userId: userId, offerId: { in: offerIds } },
+    });
+
+    const purchasesDtos: PurchaseDto[] = purchases.map((p) => ({
+      id: p.id,
+      userId: p.userId,
+      offerId: p.offerId,
+      quantity: p.quantity,
+    }));
+    return purchasesDtos;
+  }
+
   async findByUserOfferId(
     userId: string,
     offerId: string
