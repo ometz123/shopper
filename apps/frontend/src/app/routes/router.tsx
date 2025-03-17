@@ -1,6 +1,5 @@
 import { FC, lazy, memo, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
-
 import ROUTES from '../routes/routes.enum'
 
 const LzyShop = lazy(() => import('../../pages/Shop'))

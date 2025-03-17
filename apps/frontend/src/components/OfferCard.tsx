@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IOffer, IPurchase, IUser } from '@shopper/shared/types';
 import { usePurchaseOffer } from '../hooks/usePurchaseOffer';
 import './OfferCard.css';
+import { PurchaseStatus } from './PurchaseStatus';
 
 interface OfferCardProps {
   offer: IOffer;
@@ -20,7 +21,6 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, user }) => {
   } = usePurchaseOffer();
   const [purchase, setPurchase] = useState<IPurchase | null>(null);
 
-  // Handle successful purchase
   useEffect(() => {
     if (exceededLimit) {
       setPurchaseDisable(true);
@@ -39,7 +39,9 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, user }) => {
   const handlePurchase = async () => {
     setPurchase(await purchaseOffer(user.id, offer.id, 1));
   };
-
+  useEffect(() => {
+    console.log({ purchase });
+  }, [purchase]);
   return (
     <div className="offer-card">
       <img src={offer.imageUrl} alt={offer.name} className="offer-image" />
@@ -49,7 +51,6 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, user }) => {
         <p>Price: ${offer.price}</p>
         <p>Remaining Limit: {offer.limitPerUser - (purchase?.quantity || 0)}</p>
 
-        {/* Purchase button */}
         <button
           onClick={handlePurchase}
           disabled={
@@ -64,22 +65,25 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, user }) => {
             ? 'Purchasing...'
             : purchaseDisable
             ? 'Purchased'
-            : offer.limitPerUser - (purchase?.quantity || 0) <= 0
+            : exceededLimit||offer.limitPerUser - (purchase?.quantity || 0) <= 0
             ? 'Limit Exceeded'
             : 'Buy'}
         </button>
+        <PurchaseStatus
+          purchase={purchase}
+          purchaseSuccess={purchaseSuccess}
+          purchaseDisable={purchaseDisable}
+          purchaseError={purchaseError}
+        />
+        {/*{purchase && purchaseError && (*/}
+        {/*  <p className="error-message">{purchaseError}</p>*/}
+        {/*)}*/}
 
-        {/* Display purchase error */}
-        {purchase && purchaseError && (
-          <p className="error-message">{purchaseError}</p>
-        )}
-
-        {/* Display success message */}
-        {purchase && purchaseSuccess && !purchaseError && !purchaseDisable && (
-          <p className="success-message" style={{ color: 'green' }}>
-            Purchase successful!
-          </p>
-        )}
+        {/*{purchase && purchaseSuccess && !purchaseError && !purchaseDisable && (*/}
+        {/*  <p className="success-message" style={{ color: 'green' }}>*/}
+        {/*    Purchase successful!*/}
+        {/*  </p>*/}
+        {/*)}*/}
       </div>
     </div>
   );

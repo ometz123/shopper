@@ -17,7 +17,7 @@ export const usePurchaseOffer = () => {
     setIsPurchasing(true);
     setPurchaseError(null);
     setPurchaseSuccess(false);
-    setExceededLimit(false)
+    setExceededLimit(false);
 
     try {
       const response = await axios.post(`${BACKEND_URL}/purchases`, {
@@ -26,18 +26,19 @@ export const usePurchaseOffer = () => {
         quantity,
       });
       console.log(response);
-      if (response.status > 20 && response.status < 300) {
+      if (response.status >= 200 && response.status < 300) {
         setPurchaseSuccess(true);
       } else {
         setPurchaseError('Some Error from server');
       }
       return response.data;
-    } catch (err: any) {
-      console.log(err);
+    } catch (err) {
       if (err instanceof AxiosError) {
         if (err.response && err.response.status === 406) {
-          setPurchaseError('Purchase not allowed. Please check offer limits.');
+          console.log(err);
           setExceededLimit(true);
+          setPurchaseError('Purchase not allowed. Please check offer limits.');
+          return err.response.data ;
         } else {
           setPurchaseError(err.message || 'Error while purchasing the offer');
         }
@@ -48,16 +49,20 @@ export const usePurchaseOffer = () => {
       setIsPurchasing(false);
     }
   };
-
+  const validateStatus = (status: number) => {
+    return status === 404 || status === 200;
+  };
   const userOfferPurchase = async (userId: string, offerId: string) => {
     try {
       const response = await axios.get(
-        `${BACKEND_URL}/purchases/user/${userId}/offer/${offerId}`
+        `${BACKEND_URL}/purchases/user/${userId}/offer/${offerId}`,
+        {
+          validateStatus,
+        }
       );
-      console.log(userId,offerId,response.data);
-
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
+      console.log({ err });
       if (err instanceof AxiosError) {
         setPurchaseError(err.message || 'Error while fetching the offer');
       } else {

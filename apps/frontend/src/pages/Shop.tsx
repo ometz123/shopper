@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import OfferList from '../components/OfferList';
 import { useOffer } from '../hooks/useOffers';
+import useUser from '../hooks/useUser';
 import './Shop.css';
-import { useUser } from '../hooks/useUser';
 
 const Shop: React.FC = () => {
   const { offers, loading, error } = useOffer();
@@ -20,7 +20,11 @@ const Shop: React.FC = () => {
     <div className="shop-container">
       <h1>Welcome to the Shop!</h1>
       {loading && <p>Loading offers...</p>}
-      {hasError && <p className="error-message">Failed to load offers. Please try again later.</p>}
+      {hasError && (
+        <p className="error-message">
+          Failed to load offers. Please try again later.
+        </p>
+      )}
       <OfferList offers={offers} user={user} />
     </div>
   );

@@ -1,10 +1,9 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotAcceptableException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
@@ -54,8 +53,23 @@ export class PurchasesService {
             quantity: createPurchaseDto.quantity,
           },
         });
+      } else {
+        if (!userOfferPurchase) {
+          throw new InternalServerErrorException('Offer not found');
+        }
+
+        const userOfferPurchaseDto: PurchaseDto = {
+          id: userOfferPurchase.id,
+          userId: userOfferPurchase?.userId,
+          offerId: userOfferPurchase?.offerId,
+          quantity: userOfferPurchase?.quantity,
+        };
+
+        throw new NotAcceptableException(
+          userOfferPurchaseDto,
+          'Purchase quantity exceeds limit'
+        );
       }
-      throw new NotAcceptableException('Purchase quantity exceeds limit');
     });
 
     return {
@@ -92,13 +106,14 @@ export class PurchasesService {
   async findByUserOfferId(
     userId: string,
     offerId: string
-  ): Promise<PurchaseDto> {
+  ): Promise<PurchaseDto | null> {
     const purchase = await this.prismaService.purchase.findUnique({
-      where: { userId_offerId:{userId: userId, offerId: offerId }},
+      where: { userId_offerId: { userId: userId, offerId: offerId } },
     });
 
     if (!purchase) {
-      throw new NotFoundException('Purchase not found');
+      return null;
+      // throw new NotFoundException('Purchase not found');
     }
 
     const purchaseDto: PurchaseDto = {

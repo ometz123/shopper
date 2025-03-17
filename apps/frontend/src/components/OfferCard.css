@@ -6,8 +6,6 @@
     overflow: hidden;
     transition: transform 0.3s ease-in-out;
     position: relative;
-    /*padding-top: 30px; !* Give space for the message *!*/
-
 }
 
 .offer-card:hover {
@@ -63,6 +61,11 @@
 }
 
 .error-message {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 80%;
+    transform: translateX(-50%);
     color: red;
     font-size: 1rem;
     font-weight: bold;
@@ -96,5 +99,5 @@
     border: 1px solid green;
     background-color: rgba(0, 128, 0, 0.1);
     border-radius: 4px;
-    white-space: nowrap; /* Prevents text from wrapping */
+    white-space: nowrap;
 }
