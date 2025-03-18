@@ -78,6 +78,28 @@ Frontend (React):
 nx serve frontend 
 ```
 
+## Insert Mock Data
+After launching the backend, you need to insert mock data by running 2 tests:
+1. The test "should generate offers and insert to DB" is located in:
+```text
+apps/backend/src/app/offers/offers.service.spec.ts
+```
+To run the test and insert mock data, execute:
+```bash
+nx test backend --testPathPattern=offers.service.spec.ts --testNamePattern="should generate offers and insert to DB"
+```
+
+2. The test should create a test user is located in:
+```text
+apps/backend/src/app/users/users.controller.spec.ts
+```
+To run the test and insert mock data, execute:
+```bash
+pnpm nx test backend --testNamePattern="should create a test user"
+```
+
+
+
 #### Troubleshooting
 If you encounter issues with MongoDB or Prisma, double-check your .env file and ensure MongoDB is running with the
 correct replica set configuration.
