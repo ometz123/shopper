@@ -95,7 +95,7 @@ apps/backend/src/app/users/users.controller.spec.ts
 ```
 To run the test and insert mock data, execute:
 ```bash
-pnpm nx test backend --testNamePattern="should create a test user"
+nx test backend --testNamePattern="should create a test user"
 ```
 
 
